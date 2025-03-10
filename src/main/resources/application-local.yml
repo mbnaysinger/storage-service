@@ -1,8 +1,6 @@
 server:
   port: 8085
   forward-headers-strategy: native
-#swaggerfox:
-#  base-path: /docs
 spring:
   main:
     allow-bean-definition-overriding: true
@@ -16,6 +14,5 @@ app:
   api-key: b7>E9v#eQ!,UdbHEU*5]-vC<{j$3X`Pre`UpA2hz8CW%vBU-\NS66z3?f68w!pef
 azure:
   storage:
-    use-ssl: false
-    connection-string: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;
+    connection-string: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
     container-invoice: invoices
