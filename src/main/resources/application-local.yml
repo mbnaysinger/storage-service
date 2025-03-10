@@ -13,9 +13,9 @@ spring:
     mongodb:
       uri: mongodb://mongodb:27017/storage_service
 app:
-  bank-slip-api-key: b7>E9v#eQ!,UdbHEU*5]-vC<{j$3X`Pre`UpA2hz8CW%vBU-\NS66z3?f68w!pef
-  sale-order-key: K9>M3x#fR!,ZghJLW*8]-yB<{p$7Y`Tse`WqA5kz2DX%wCN-\PS14t6?h92v!mgi
+  api-key: b7>E9v#eQ!,UdbHEU*5]-vC<{j$3X`Pre`UpA2hz8CW%vBU-\NS66z3?f68w!pef
 azure:
   storage:
+    use-ssl: false
     connection-string: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;
     container-invoice: invoices
