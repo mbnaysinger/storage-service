@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 @RestController("InvoiceControllerV1")
 @RequestMapping("/v1/invoice")
 public class InvoiceController {
@@ -46,15 +49,46 @@ public class InvoiceController {
 
                             return convertFilePartToBytes(part)
                                     .flatMap(fileBytes -> {
-                                        LOGGER.debug("Arquivo convertido para bytes. Tamanho: {} bytes", fileBytes.length);
-                                        return fileStorageService.saveInvoice(originalFilename, fileBytes);
-                                    })
-                                    .doOnSuccess(result -> LOGGER.info("Arquivo processado com sucesso: {}", originalFilename))
-                                    .doOnError(error -> LOGGER.error("Erro ao processar arquivo: {}", error.getMessage()));
+                                        String sha256Hash = generateSHA256(fileBytes);
+                                        String fileName = generateFileName(sha256Hash, originalFilename);
+                                        LOGGER.debug("Processando arquivo: {}", fileName);
+
+                                        return fileStorageService.saveInvoice(fileName, fileBytes)
+                                                .doOnSuccess(result -> LOGGER.info("Arquivo processado com sucesso: {}", originalFilename))
+                                                .doOnError(error -> LOGGER.error("Erro ao processar arquivo: {}", error.getMessage()));
+                                    });
                         })
                 )
                 .map(result -> "Upload realizado com sucesso.")
                 .onErrorResume(this::handleError);
+    }
+
+    private String generateSHA256(byte[] fileBytes) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedHash = digest.digest(fileBytes);
+            return bytesToHex(encodedHash);
+        } catch (NoSuchAlgorithmException e) {
+            LOGGER.error("Erro ao gerar hash SHA-256", e);
+            throw new RuntimeException("Erro ao gerar hash SHA-256", e);
+        }
+    }
+
+    private String bytesToHex(byte[] hash) {
+        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        for (byte b : hash) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
+
+    private String generateFileName(String sha256Hash, String originalFilename) {
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        return sha256Hash + extension;
     }
 
     private Mono<byte[]> convertFilePartToBytes(FilePart filePart) {
