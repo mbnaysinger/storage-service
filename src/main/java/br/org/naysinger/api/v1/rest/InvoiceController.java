@@ -39,28 +39,23 @@ public class InvoiceController {
 
         return Mono.justOrEmpty(apiKey.equals(apiKeyParam) ? apiKey : null)
                 .switchIfEmpty(Mono.error(new SecurityException(AUTHORIZATION_ERROR)))
-                .flatMap(validApiKey -> filePart
+                .flatMap(validKey -> filePart
                         .flatMap(part -> {
                             String originalFilename = part.filename();
-
-                            String fileName = generateFileName("_", "teste_", "invoice_", originalFilename);
-                            LOGGER.debug("Processando arquivo: {}", fileName);
+                            LOGGER.debug("Processando arquivo: {}", originalFilename);
 
                             return convertFilePartToBytes(part)
-                                    .flatMap(fileBytes -> fileStorageService.saveInvoice(fileName, fileBytes))
-                                    .doOnSuccess(result -> LOGGER.info("Arquivo processado com sucesso: {}", fileName))
+                                    .flatMap(fileBytes -> {
+                                        LOGGER.debug("Arquivo convertido para bytes. Tamanho: {} bytes", fileBytes.length);
+                                        return fileStorageService.saveInvoice(originalFilename, fileBytes);
+                                    })
+                                    .doOnSuccess(result -> LOGGER.info("Arquivo processado com sucesso: {}", originalFilename))
                                     .doOnError(error -> LOGGER.error("Erro ao processar arquivo: {}", error.getMessage()));
                         })
                 )
                 .map(result -> "Upload realizado com sucesso.")
                 .onErrorResume(this::handleError);
     }
-
-    private String generateFileName(String type, String correlationId, String sourceSystem, String originalFilename) {
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        return type + correlationId + sourceSystem + extension;
-    }
-
 
     private Mono<byte[]> convertFilePartToBytes(FilePart filePart) {
         return filePart.content()
